@@ -1,0 +1,124 @@
+<!-- html for the view invoices page -->
+ 
+{% extends 'base.html' %}
+ 
+{% block title %}View Invoices  Basic Flask App{% endblock %}
+ 
+{% block content %}
+<h1>View Invoices</h1>
+{% if errors %}
+<!-- errors list -->
+<div class="alert alert-danger">
+  <ul>
+    {% for e in errors %}
+      <li>{{ e }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+ 
+ 
+<div class="container mt-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="mb-0">Invoices</h3>
+ 
+    <!-- <div class="btn-toolbar gap-2" role="group"> -->
+      <!-- buttons for editing and deleting selected invoices  may keep or remove depending on minimum viable product -->
+      <!-- <button id="editSelectedBtn" class="btn btn-primary" disabled>
+        <i class="bi bi-pencil-square me-1"></i> Edit Selected
+      </button>
+      <button id="deleteSelectedBtn" class="btn btn-primary" disabled>
+        <i class="bi bi-trash me-1"></i> Delete Selected
+      </button>
+    </div> -->
+ 
+    <div class="btn-group ms-2" role="group">
+      <button id="add new invoice" class="btn btn-success" onclick="location.href='/New Invoice'">
+        <i class="bi bi-plus-lg me-1"></i> Add New Invoice
+      </button>
+    </div>
+</div>
+ 
+<!-- Search form -->
+    <form method="get" action="{{url_for('view_invoices')}}" class="mb-4">
+      <div class="row g-3">
+        <div class="col-md-4">
+            <select name="search_field" class="form-select">
+            <option value="" selected disabled>Search by</option>
+            <option value="invoice_no">Invoice Number</option>
+            <option value="customer_name">Customer Name</option>
+            <option value="customer_address">Customer Address</option>
+            <option value="date">Date</option>
+            <option value="item_description">Item Description</option>
+            <option value="total">Total</option>
+            </select>
+        </div>
+ 
+        <div class="col-md-6">
+            <input type="text" name="search_query" class="form-control" placeholder="Enter search term" value="{{search_query}}">
+        </div>
+ 
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+            <a href="{{url_for('view_invoices')}}" class="btn btn-secondary w-100">Clear</a>
+      </div>
+      </div>
+    </form>
+    </div>
+  </div>
+ 
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table id="invoiceTable" class="table table-hover align-middle mb-0">
+          <!-- Table header -->
+          <thead class="table-light">
+            <tr>
+              <th style="width:3rem;"></th>
+              <th>Invoice Number</th>
+              <th>Customer Name</th>
+              <th>Customer Address</th>
+              <th>Date</th>
+              <th>Item Description</th>
+              <th class="text-end">Total</th>
+              <th style="width:7rem;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Invoice rows -->
+            {% for inv in invoices %}
+            <tr data-id="{{ inv['id'] }}">
+              <td>
+                <input class="form-check-input select-row" type="radio" name="selectedInvoice" value="{{ inv['id'] }}" aria-label="Select invoice {{ inv['invoice_no'] }}">
+              </td>
+              <td><i class="bi bi-receipt me-1 text-secondary"></i>{{ inv['invoice_no'] }}</td>
+              <td><i class="bi bi-geo-alt me-1 text-secondary"></i>{{ inv['customer_name'] }}</td>
+              <td><i class="bi bi-person me-1 text-secondary"></i>{{ inv['customer_address'] }}</td>
+              <td>{{ inv['date'] }}</td>
+              <td>{{ inv['item_description'] }}</td>
+              <td class="text-end">£{{ '%.2f'|format(inv['total']) }}</td>
+              <td class="text-end">
+                <!-- Buttons for editing and deleting -->
+                 <!-- Send to update invoice page -->
+                <a class="btn btn-sm btn-outline-primary" href="/update/{{ inv['invoice_id'] }}">Edit</a>
+                <!-- Send to delete invoice route -->
+                 <!--Confirmation pop up before deletion -->
+                <a class="btn btn-sm btn-outline-danger" href="/delete/{{ inv['invoice_id'] }}" onclick="return confirm('Are you sure you want to delete this invoice?');">Delete</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center">No invoices found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<a href="/" class="btn btn-secondary mt-3">Back home</a>
+ 
+{% endblock %}
+ 
+ 
+ 

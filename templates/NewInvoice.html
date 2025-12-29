@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+ 
+{% block title %}Create New Invoice — Basic Flask App{% endblock %}
+ 
+{% block content %}
+{% if errors %}
+<!-- errors list -->
+<div class="alert alert-danger">
+  <ul>
+    {% for e in errors %}
+      <li>{{ e }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+ 
+<!-- title and user message-->
+<h1>Create a New Invoice</h1>
+<p>Enter invoice details below:</p>
+<a href="/" class="btn btn-secondary">Back home</a>
+<div class="container mt-4">
+ 
+    {% if error_message %}
+        <div class="alert alert-danger mt-3">{{ error_message }}</div>
+    {% endif %}
+    <!-- invoice form -->
+    <form method="post" action="/New Invoice">
+    <div class="row g-4 p-4 border rounded bg-light">
+ 
+        <!-- Customer Details -->
+        <div class="col-md-6">
+            <h4>Customer Details</h4>
+ 
+            <label class="form-label mt-2">Name:</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <!-- error handling to make fields required and their type for client side processing -->
+                <input type="text" class="form-control" name="customer_name" maxlength= "100" required>
+            </div>
+ 
+            <label class="form-label mt-3">Address:</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                <input type="text" class="form-control" name="customer_address" maxlength="100" required>
+            </div>
+ 
+            <label class="form-label mt-3">Date:</label>
+            <input type="date" class="form-control" name="date" required>
+        </div>
+ 
+        <!-- Invoice Details -->
+        <div class="col-md-6">
+            <h4>Invoice Details</h4>
+ 
+            <label class="form-label mt-2">Invoice No:</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                <input type="number" class="form-control" name="invoice_no" min="1" required>
+            </div>
+ 
+            <label class="form-label mt-3">Description:</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-cash-coin"></i></span>
+                <textarea class="form-control" name="item_description" rows="3" maxlength="500"></textarea>
+            </div>
+ 
+            <label class="form-label mt-3">Total:</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-currency-pound"></i></span>
+                <input type="number" step="0.01" class="form-control" name="total" required>
+            </div>
+        </div>
+ 
+        <div class="col-12 mt-4">
+            <button class="btn btn-primary px-4">Add Invoice</button>
+        </div>
+ 
+    </div>
+    </form>
+</div>
+{% endblock %}
+ 
+ 
+ 
