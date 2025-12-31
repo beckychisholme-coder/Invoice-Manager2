@@ -7,7 +7,7 @@ from datetime import datetime
  
 # Detect if running on Azure App Service
 RUNNING_IN_AZURE = (
-    "https://invoice-manager-d9bkh4cefhcsfpb6.westeurope-01.azurewebsites.net/"
+    "WEBSITE_SITE_NAME"
     in os.environ
 )
  
@@ -114,13 +114,20 @@ def add_invoice(invoice_no: int, customer_name: str, customer_address: str,
     cursor = conn.cursor()
  
     try:
-        # Insert customer
+        # Find existing customer or insert a new one
         cursor.execute(
-            'INSERT INTO customers (customer_name, customer_address) '
-            'VALUES (?, ?)',
+            'SELECT customer_id FROM customers WHERE customer_name = ? AND customer_address = ?',
             (customer_name, customer_address)
         )
-        customer_id = cursor.lastrowid
+        row = cursor.fetchone()
+        if row:
+            customer_id = row['customer_id']
+        else:
+            cursor.execute(
+                'INSERT INTO customers (customer_name, customer_address) VALUES (?, ?)',
+                (customer_name, customer_address)
+            )
+            customer_id = cursor.lastrowid
  
         # Insert invoice linked to customer
         cursor.execute(
@@ -152,23 +159,7 @@ def delete_invoice(invoice_id):
     safe_execute(query, (invoice_id,))
  
  
-# # Update an existing invoice in the database
-# def update_invoice(invoice_id, invoice_no, customer_name,
-#                    customer_address, date, item_description, total):
-#     """
-#     Update an existing invoice in the database.
-#     Parameters: invoice_id, invoice_no, customer_name,
-#                 customer_address, date, item_description, total
-#     Returns: None, used for updating an invoice record
-#     """
-#     query = '''UPDATE customers SET customer_name=?,
-#                customer_address=? WHERE customer_id=?
-#     UPDATE invoices SET invoice_no=?, date=?, item_description=?,
-#            total=? WHERE invoice_id=?'''
-#     safe_execute(query, (customer_name, customer_address, invoice_id,
-#                          invoice_no, date, item_description, total,
-#                          invoice_id))
- 
+
  
 def update_invoice(invoice_id, invoice_no, customer_name, customer_address,
                    date, item_description, total):
@@ -177,25 +168,25 @@ def update_invoice(invoice_id, invoice_no, customer_name, customer_address,
     cursor = conn.cursor()
  
     try:
-        # Get customer_id for this invoice
+        # Find or create the customer for the provided name/address
         cursor.execute(
-            "SELECT customer_id FROM invoices WHERE invoice_id = ?",
-            (invoice_id,)
+            'SELECT customer_id FROM customers WHERE customer_name = ? AND customer_address = ?',
+            (customer_name, customer_address)
         )
-        customer_id = cursor.fetchone()["customer_id"]
- 
-        # Update customer
+        row = cursor.fetchone()
+        if row:
+            new_customer_id = row['customer_id']
+        else:
+            cursor.execute(
+                'INSERT INTO customers (customer_name, customer_address) VALUES (?, ?)',
+                (customer_name, customer_address)
+            )
+            new_customer_id = cursor.lastrowid
+
+        # Update invoice to point to the (existing or newly-created) customer
         cursor.execute(
-            "UPDATE customers SET customer_name=?, customer_address=? "
-            "WHERE customer_id=?",
-            (customer_name, customer_address, customer_id)
-        )
- 
-        # Update invoice
-        cursor.execute(
-            "UPDATE invoices SET invoice_no=?, date=?, item_description=?, "
-            "total=? WHERE invoice_id=?",
-            (invoice_no, date, item_description, total, invoice_id)
+            "UPDATE invoices SET customer_id = ?, invoice_no = ?, date = ?, item_description = ?, total = ? WHERE invoice_id = ?",
+            (new_customer_id, invoice_no, date, item_description, total, invoice_id)
         )
  
         conn.commit()

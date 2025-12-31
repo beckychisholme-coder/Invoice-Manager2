@@ -8,6 +8,9 @@ CREATE TABLE customers (
     customer_name TEXT NOT NULL,
     customer_address TEXT NOT NULL
 );
+
+-- Ensure customers with the same name+address are unique
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_unique ON customers(customer_name, customer_address);
  
 CREATE TABLE invoices (
     invoice_id INTEGER PRIMARY KEY AUTOINCREMENT,
